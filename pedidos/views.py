@@ -1,5 +1,6 @@
 """Views for the pedidos app."""
 
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -110,6 +111,7 @@ def cart_count(request):
     return JsonResponse({'cart_count': count})
 
 
+@login_required
 def checkout(request):
     """Vista de checkout: resumen, envío y creación del pedido."""
     cart = _get_cart(request)
@@ -161,6 +163,15 @@ def checkout(request):
                         f'Stock insuficiente para {producto.nombre}. Disponible: {producto.stock}'
                     )
                     return redirect('pedidos:checkout')
+
+            # Usar datos del usuario autenticado si no se proporcionaron en el formulario
+            if not cliente_nombre:
+                cliente_nombre = request.user.get_full_name() or request.user.username
+            if not cliente_email:
+                cliente_email = request.user.email
+            if not direccion_envio:
+                if hasattr(request.user, 'perfil') and request.user.perfil.direccion:
+                    direccion_envio = request.user.perfil.direccion
 
             # Crear pedido
             pedido = Pedido.objects.create(
