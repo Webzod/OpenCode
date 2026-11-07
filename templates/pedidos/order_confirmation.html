@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Pedido Confirmado{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card text-center border-success shadow-sm">
+            <div class="card-body py-5">
+                <i class="bi bi-check-circle-fill display-1 text-success mb-3"></i>
+                <h1 class="card-title">¡Pedido Confirmado!</h1>
+                <p class="text-muted mb-4">Gracias por tu compra. Tu pedido ha sido registrado.</p>
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Número de pedido</th>
+                            <td>#{{ pedido.pk }}</td>
+                        </tr>
+                        <tr>
+                            <th>Cliente</th>
+                            <td>{{ pedido.cliente_nombre }}</td>
+                        </tr>
+                        <tr>
+                            <th>Fecha</th>
+                            <td>{{ pedido.fecha|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Subtotal</th>
+                            <td>${{ pedido.subtotal }}</td>
+                        </tr>
+                        <tr>
+                            <th>Costo de envío</th>
+                            <td>${{ pedido.costo_envio }}</td>
+                        </tr>
+                        <tr class="table-primary fw-bold">
+                            <th>Total</th>
+                            <td>${{ pedido.total }}</td>
+                        </tr>
+                        <tr>
+                            <th>Estado</th>
+                            <td><span class="badge bg-info">{{ pedido.get_estado_display }}</span></td>
+                        </tr>
+                        <tr>
+                            <th>Método de envío</th>
+                            <td>{{ pedido.envio.metodo.nombre }}</td>
+                        </tr>
+                        <tr>
+                            <th>Tiempo estimado</th>
+                            <td>{{ pedido.envio.tiempo_entrega }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <a href="{% url 'catalogo:product_list' %}" class="btn btn-success mt-3">
+                    <i class="bi bi-shoe1-fill"></i> Seguir comprando
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

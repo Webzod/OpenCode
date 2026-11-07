@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Catálogo de Zapatos{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="mb-3">Nuestro Catálogo</h1>
+        <p class="text-muted">Encuentra el par perfecto de zapatos para cada ocasión.</p>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Filtrar productos</h5>
+        <form id="filter-form" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Tipo de zapato</label>
+                <select class="form-select" name="tipo" id="filtro-tipo">
+                    <option value="">Todos los tipos</option>
+                    {% for tipo in tipos %}
+                        <option value="{{ tipo.id }}" {% if filtro_tipo == tipo.id|stringformat:"s" %}selected{% endif %}>
+                            {{ tipo.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Talla</label>
+                <select class="form-select" name="talla" id="filtro-talla">
+                    <option value="">Todas las tallas</option>
+                    {% for talla in tallas %}
+                        <option value="{{ talla }}" {% if filtro_talla == talla %}selected{% endif %}>
+                            {{ talla }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Color</label>
+                <select class="form-select" name="color" id="filtro-color">
+                    <option value="">Todos los colores</option>
+                    {% for color in colores %}
+                        <option value="{{ color }}" {% if filtro_color == color %}selected{% endif %}>
+                            {{ color }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Buscar</label>
+                <input type="text" class="form-control" name="q" id="filtro-q" value="{{ query|default:'' }}" placeholder="Buscar zapatos...">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="button" class="btn btn-primary w-100" id="btn-aplicar-filtros">Aplicar filtros</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Productos -->
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="productos-container">
+    {% for producto in productos %}
+        {% include 'catalogo/_product_card.html' with producto=producto %}
+    {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="bi bi-search display-4 text-muted"></i>
+                <h3>No se encontraron productos</h3>
+                <p class="text-muted">Intenta ajustar tus filtros de búsqueda.</p>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<div id="productos-json" data-url="{% url 'catalogo:productos_json' %}" style="display:none;"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/product.js' %}"></script>
+{% endblock %}

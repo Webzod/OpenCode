@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h2 class="mb-4">Resumen del Pedido</h2>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Productos</h5>
+                        {% for item in items %}
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>{{ item.producto.nombre }} ({{ item.cantidad }} x ${{ item.producto.precio }})</span>
+                                <span>${{ item.subtotal }}</span>
+                            </div>
+                        {% endfor %}
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold">
+                            <span>Subtotal:</span>
+                            <span>${{ subtotal }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Envío</h5>
+                        <form id="form-envio">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label">Método de envío</label>
+                                <select class="form-select" name="metodo_envio" id="metodo-envio" required>
+                                    <option value="">Seleccionar método...</option>
+                                    {% for metodo in metodos_envio %}
+                                        <option value="{{ metodo.id }}" data-costo="{{ metodo.costo }}" data-tiempo="{{ metodo.tiempo_entrega }}">
+                                            {{ metodo.nombre }} - ${{ metodo.costo }} ({{ metodo.tiempo_entrega }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Costo de envío</label>
+                                <input type="text" class="form-control" id="costo-envio-display" readonly value="$0.00">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Tiempo de entrega estimado</label>
+                                <input type="text" class="form-control" id="tiempo-entrega-display" readonly>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Datos del Cliente</h5>
+                <form method="post" action="{% url 'pedidos:checkout' %}" id="form-checkout">
+                    {% csrf_token %}
+                    <input type="hidden" name="metodo_envio" id="metodo-envio-input">
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre completo</label>
+                            <input type="text" class="form-control" name="cliente_nombre" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Correo electrónico</label>
+                            <input type="email" class="form-control" name="cliente_email" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Dirección de envío</label>
+                            <textarea class="form-control" name="direccion_envio" rows="3" required></textarea>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold">Total a pagar:</span>
+                        <span id="total-final" class="fs-5 fw-primary">${{ subtotal }}</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mt-3" id="btn-pagar">
+                        <i class="bi bi-credit-card"></i> Confirmar pedido
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectEnvio = document.getElementById('metodo-envio');
+    const costoDisplay = document.getElementById('costo-envio-display');
+    const tiempoDisplay = document.getElementById('tiempo-entrega-display');
+    const metodoInput = document.getElementById('metodo-envio-input');
+    const totalFinal = document.getElementById('total-final');
+    
+    // Leer subtotal del DOM (se renderiza desde Django)
+    let subtotal = parseFloat(totalFinal.textContent.replace('$', '').replace(',', ''));
+
+    selectEnvio.addEventListener('change', function() {
+        const option = this.options[this.selectedIndex];
+        if (option.value) {
+            const costo = parseFloat(option.dataset.costo);
+            const tiempo = option.dataset.tiempo;
+            
+            costoDisplay.textContent = '$' + costo.toFixed(2);
+            tiempoDisplay.textContent = tiempo;
+            metodoInput.value = option.value;
+            
+            const total = subtotal + costo;
+            totalFinal.textContent = '$' + total.toFixed(2);
+        } else {
+            costoDisplay.textContent = '$0.00';
+            tiempoDisplay.textContent = '';
+            metodoInput.value = '';
+            totalFinal.textContent = '$' + subtotal.toFixed(2);
+        }
+    });
+});
+</script>
+
+{% endblock %}

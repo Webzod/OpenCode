@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Carrito de Compras{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <h2 class="mb-4">Tu Carrito</h2>
+
+        {% if items %}
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle" id="tabla-carrito">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Producto</th>
+                            <th class="text-center">Precio</th>
+                            <th class="text-center">Cantidad</th>
+                            <th class="text-center">Subtotal</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr data-product-id="{{ item.producto.id }}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if item.producto.imagen %}
+                                        <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" class="rounded me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold">{{ item.producto.nombre }}</div>
+                                        <div class="small text-muted">{{ item.producto.talla }} · {{ item.producto.color }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center">${{ item.producto.precio }}</td>
+                            <td class="text-center">
+                                <input type="number" class="form-control form-control-sm cantidad-input" value="{{ item.cantidad }}" min="1" max="{{ item.producto.stock }}" data-product-id="{{ item.producto.id }}">
+                            </td>
+                            <td class="text-center subtotal-item">${{ item.subtotal }}</td>
+                            <td class="text-center">
+                                <form method="post" action="{% url 'pedidos:cart_remove' %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="product_id" value="{{ item.producto.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="row justify-content-end mt-4">
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Resumen</h5>
+                            <hr>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal:</span>
+                                <span id="subtotal-total">${{ subtotal }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Envío:</span>
+                                <span id="envio-costo">$0.00</span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between fw-bold fs-5">
+                                <span>Total:</span>
+                                <span id="total-pedido">${{ subtotal }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'pedidos:checkout' %}" class="btn btn-success btn-lg px-5">
+                    <i class="bi bi-credit-card"></i> Continuar al pago
+                </button>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-cart-x display-4 text-muted"></i>
+                <h3>Tu carrito está vacío</h3>
+                <p class="text-muted">Aún no has agregado productos al carrito.</p>
+                <a href="{% url 'catalogo:product_list' %}" class="btn btn-primary">
+                    <i class="bi bi-shoe1-fill"></i> Ver catálogo
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Actualizar cantidad al cambiar el input
+    const inputs = document.querySelectorAll('.cantidad-input');
+    inputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const productId = this.dataset.productId;
+            const quantity = this.value;
+            
+            fetch('{% url "pedidos:cart_update" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: `product_id=${productId}&quantity=${quantity}`
+            });
+        });
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,61 @@
+/* Zapatos Store - Estilos personalizados */
+
+body {
+    padding-top: 76px; /* Compensar navbar fija */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+}
+
+.card {
+    transition: transform 0.2s ease-in-out;
+    border: none;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-img-top {
+    height: 220px;
+    object-fit: cover;
+}
+
+.btn-primary {
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+}
+
+.btn-primary:hover {
+    background-color: #5a32a3;
+    border-color: #5a32a3;
+}
+
+.badge.bg-success {
+    background-color: #198754;
+}
+
+.badge.bg-danger {
+    background-color: #dc3545;
+}
+
+footer {
+    border-top: 1px solid #444;
+}
+
+/* Badge del carrito en el navbar */
+#cart-count-badge {
+    font-size: 0.75rem;
+}
+
+/* Animación al agregar al carrito */
+.agregado-animado {
+    animation: bounce 0.3s ease-in-out;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
